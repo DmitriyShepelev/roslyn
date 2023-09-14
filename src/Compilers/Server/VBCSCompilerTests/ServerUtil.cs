@@ -18,6 +18,8 @@ using Moq;
 using Xunit;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Collections.Generic;
+using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.CompilerServer.UnitTests
 {
@@ -36,7 +38,8 @@ namespace Microsoft.CodeAnalysis.CompilerServer.UnitTests
         internal static readonly BuildResponse EmptyBuildResponse = new CompletedBuildResponse(
             returnCode: 0,
             utf8output: false,
-            output: string.Empty);
+            output: string.Empty,
+            fileAccessData: new List<FileAccessDataSlim>());
 
         internal static BuildRequest CreateEmptyCSharp(string workingDirectory, string tempDirectory = null) => BuildRequest.Create(
             RequestLanguage.CSharpCompile,

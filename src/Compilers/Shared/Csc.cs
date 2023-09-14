@@ -25,7 +25,7 @@ namespace Microsoft.CodeAnalysis.CSharp.CommandLine
 
             var responseFile = Path.Combine(buildPaths.ClientDirectory, CSharpCompiler.ResponseFileName);
             var compiler = new Csc(responseFile, buildPaths, args, analyzerLoader);
-            return ConsoleUtil.RunWithUtf8Output(compiler.Arguments.Utf8Output, textWriter, tw => compiler.Run(tw));
+            return ConsoleUtil.RunWithUtf8Output(compiler.Arguments.Utf8Output, textWriter, tw => compiler.Run(tw, out _));
         }
     }
 }

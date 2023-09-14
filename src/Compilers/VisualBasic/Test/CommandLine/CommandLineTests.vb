@@ -83,7 +83,7 @@ dotnet_diagnostic.bc42024.severity = none")
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths))
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = cmd.Run(outWriter)
+            Dim exitCode = cmd.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
             Assert.Equal("", outWriter.ToString())
 
@@ -123,7 +123,7 @@ my_option2 = my_val2")
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths))
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = cmd.Run(outWriter)
+            Dim exitCode = cmd.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
             Assert.Equal("", outWriter.ToString())
 
@@ -178,7 +178,7 @@ dotnet_diagnostic.BC42024.severity = garbage")
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths))
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = cmd.Run(outWriter)
+            Dim exitCode = cmd.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
             Assert.Equal(
 $"vbc : warning InvalidSeverityInAnalyzerConfig: The diagnostic 'bc42024' was given an invalid severity 'garbage' in the analyzer config file at '{analyzerConfig.Path}'.
@@ -215,7 +215,7 @@ dotnet_diagnostic.cs0169.severity = suppress"
             })
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = cmd.Run(outWriter)
+            Dim exitCode = cmd.Run(outWriter, Nothing)
             Assert.Equal(1, exitCode)
             Assert.Equal(
                 $"vbc : error BC37317: Multiple analyzer config files cannot be in the same directory ('{dir.Path}').",
@@ -238,7 +238,7 @@ End Module")
             Dim cmd = New MockVisualBasicCompiler(Nothing, dir.Path, {"/nologo", "/errorlog:errorlog", $"/doc:{docName}", "/warnaserror", src.Path})
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = cmd.Run(outWriter)
+            Dim exitCode = cmd.Run(outWriter, Nothing)
             Assert.Equal("", outWriter.ToString())
             Assert.Equal(0, exitCode)
 
@@ -257,14 +257,14 @@ End Class")
             Dim cmd = New MockVisualBasicCompiler(Nothing, dir.Path, {"/nologo", "/t:library", "/preferreduilang:en", $"/doc:{docName}", src.Path})
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = cmd.Run(outWriter)
+            Dim exitCode = cmd.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
             Assert.Equal("", outWriter.ToString())
 
             Dim xmlPath = Path.Combine(dir.Path, docName)
             Using fileStream = New FileStream(xmlPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
                 Using mmf = MemoryMappedFile.CreateFromFile(fileStream, "xmlMap", 0, MemoryMappedFileAccess.Read, HandleInheritability.None, leaveOpen:=True)
-                    exitCode = cmd.Run(outWriter)
+                    exitCode = cmd.Run(outWriter, Nothing)
                     Assert.Equal(1, exitCode)
                     Assert.StartsWith($"vbc : error BC2012: can't open '{xmlPath}' for writing:", outWriter.ToString())
                 End Using
@@ -1019,7 +1019,7 @@ End Module").Path
                 "/preferreduilang:en",
                 "/win32resource:" + badres,
                 source
-            }).Run(outWriter)
+            }).Run(outWriter, Nothing)
 
             Assert.Equal(1, exitCode)
             Assert.Equal("vbc : error BC30136: Error creating Win32 resources: Unrecognized resource file format.", outWriter.ToString().Trim())
@@ -3183,7 +3183,7 @@ End Class")
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
             Dim vbc = New MockVisualBasicCompiler(Nothing, dir.Path, {"/nologo", "/debug:embedded", "/sourcelink:sl.json", "a.vb"})
-            Dim exitCode As Integer = vbc.Run(outWriter)
+            Dim exitCode As Integer = vbc.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
 
             Dim peStream = File.OpenRead(Path.Combine(dir.Path, "a.exe"))
@@ -3216,7 +3216,7 @@ End Class")
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
             Dim vbc = New MockVisualBasicCompiler(Nothing, dir.Path, {"/nologo", "/debug:portable", "/sourcelink:sl.json", "a.vb"})
-            Dim exitCode As Integer = vbc.Run(outWriter)
+            Dim exitCode As Integer = vbc.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
 
             Dim pdbStream = File.OpenRead(Path.Combine(dir.Path, "a.pdb"))
@@ -3371,7 +3371,7 @@ print Goodbye, World"
 
             Dim output = New StringWriter(CultureInfo.InvariantCulture)
             Dim vbc = New MockVisualBasicCompiler(Nothing, dir.Path, {"/nologo", debugSwitch, embedSwitch, "embed.vb", "embed2.vb"})
-            Dim exitCode = vbc.Run(output)
+            Dim exitCode = vbc.Run(output, Nothing)
             Assert.Equal("", output.ToString().Trim())
             Assert.Equal(0, exitCode)
 
@@ -3643,7 +3643,7 @@ End Module
                     Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
 
                     Dim vbc = New MockVisualBasicCompiler(dir.Path, args)
-                    Dim exitCode = vbc.Run(outWriter)
+                    Dim exitCode = vbc.Run(outWriter, Nothing)
                     Assert.Equal(0, exitCode)
 
                     Dim exePath = Path.Combine(dir.Path, "a.exe")
@@ -4036,7 +4036,7 @@ End Module
         Public Sub ConsistentErrorMessageWhenProvidingNoKeyFile()
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
             Dim vbc = New MockVisualBasicCompiler(Nothing, _baseDirectory, {"/keyfile:", "/target:library", "/nologo", "/preferreduilang:en", "a.vb"})
-            Dim exitCode = vbc.Run(outWriter)
+            Dim exitCode = vbc.Run(outWriter, Nothing)
 
             Assert.Equal(1, exitCode)
             Assert.Equal("vbc : error BC2006: option 'keyfile' requires ':<file>'", outWriter.ToString().Trim())
@@ -4046,7 +4046,7 @@ End Module
         Public Sub ConsistentErrorMessageWhenProvidingEmptyKeyFile()
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
             Dim vbc = New MockVisualBasicCompiler(Nothing, _baseDirectory, {"/keyfile:""""", "/target:library", "/nologo", "/preferreduilang:en", "a.vb"})
-            Dim exitCode = vbc.Run(outWriter)
+            Dim exitCode = vbc.Run(outWriter, Nothing)
 
             Assert.Equal(1, exitCode)
             Assert.Equal("vbc : error BC2006: option 'keyfile' requires ':<file>'", outWriter.ToString().Trim())
@@ -4056,7 +4056,7 @@ End Module
         Public Sub ConsistentErrorMessageWhenProvidingNoKeyFile_PublicSign()
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
             Dim vbc = New MockVisualBasicCompiler(Nothing, _baseDirectory, {"/keyfile:", "/publicsign", "/target:library", "/nologo", "/preferreduilang:en", "a.vb"})
-            Dim exitCode = vbc.Run(outWriter)
+            Dim exitCode = vbc.Run(outWriter, Nothing)
 
             Assert.Equal(1, exitCode)
             Assert.Equal("vbc : error BC2006: option 'keyfile' requires ':<file>'", outWriter.ToString().Trim())
@@ -4066,7 +4066,7 @@ End Module
         Public Sub ConsistentErrorMessageWhenProvidingEmptyKeyFile_PublicSign()
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
             Dim vbc = New MockVisualBasicCompiler(Nothing, _baseDirectory, {"/keyfile:""""", "/publicsign", "/target:library", "/nologo", "/preferreduilang:en", "a.vb"})
-            Dim exitCode = vbc.Run(outWriter)
+            Dim exitCode = vbc.Run(outWriter, Nothing)
 
             Assert.Equal(1, exitCode)
             Assert.Equal("vbc : error BC2006: option 'keyfile' requires ':<file>'", outWriter.ToString().Trim())
@@ -9325,7 +9325,7 @@ End Class")
             Dim vbc = New MockVisualBasicCompiler(Nothing, dir.Path,
                 {"/define:_MYTYPE=""Empty"" ", "/nologo", "/out:a.exe", "/refout:ref/a.dll", "/doc:doc.xml", "/deterministic", "a.vb"})
 
-            Dim exitCode = vbc.Run(outWriter)
+            Dim exitCode = vbc.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
 
             Dim exe = Path.Combine(dir.Path, "a.exe")
@@ -9396,7 +9396,7 @@ End Class")
             Dim vbc = New MockVisualBasicCompiler(Nothing, dir.Path,
                 {"/define:_MYTYPE=""Empty"" ", "/nologo", "/out:a.dll", "/refout:ref/a.dll", "/deterministic", "/preferreduilang:en", "a.vb"})
 
-            Dim exitCode = vbc.Run(outWriter)
+            Dim exitCode = vbc.Run(outWriter, Nothing)
             Assert.Equal(1, exitCode)
 
             Dim vb = Path.Combine(dir.Path, "a.vb")
@@ -9443,7 +9443,7 @@ End Class")
             Dim vbc = New MockVisualBasicCompiler(Nothing, dir.Path,
                 {"/define:_MYTYPE=""Empty"" ", "/nologo", "/out:a.dll", "/refonly", "/debug", "/deterministic", "/doc:doc.xml", "a.vb"})
 
-            Dim exitCode = vbc.Run(outWriter)
+            Dim exitCode = vbc.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
 
             Dim refDll = Path.Combine(dir.Path, "a.dll")
@@ -9546,7 +9546,7 @@ End Module
             Dim exePath = Path.Combine(Path.GetDirectoryName(srcPath), "test.exe")
             Dim vbc = New MockVisualBasicCompiler(_baseDirectory, {"/nologo", "/preferreduilang:en", $"/out:{exePath}", srcPath})
             vbc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc:=
-                            Function(filePath, mode, access, share)
+                            Function(filePath, mode, access, share, fileAccessData)
                                 If filePath = exePath Then
                                     Return New TestStream(backingStream:=New MemoryStream(), dispose:=Sub() Throw New IOException("Fake IOException"))
                                 End If
@@ -9555,7 +9555,7 @@ End Module
                             End Function)
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Assert.Equal(1, vbc.Run(outWriter))
+            Assert.Equal(1, vbc.Run(outWriter, Nothing))
             Assert.Equal($"vbc : error BC2012: can't open '{exePath}' for writing: Fake IOException{Environment.NewLine}", outWriter.ToString())
         End Sub
 
@@ -9566,7 +9566,7 @@ End Module
             Dim pdbPath = Path.ChangeExtension(exePath, "pdb")
             Dim vbc = New MockVisualBasicCompiler(_baseDirectory, {"/nologo", "/preferreduilang:en", "/debug", $"/out:{exePath}", srcPath})
             vbc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc:=
-                            Function(filePath, mode, access, share)
+                            Function(filePath, mode, access, share, fileAccessData)
                                 If filePath = pdbPath Then
                                     Return New TestStream(backingStream:=New MemoryStream(), dispose:=Sub() Throw New IOException("Fake IOException"))
                                 End If
@@ -9575,7 +9575,7 @@ End Module
                             End Function)
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Assert.Equal(1, vbc.Run(outWriter))
+            Assert.Equal(1, vbc.Run(outWriter, Nothing))
             Assert.Equal($"vbc : error BC2012: can't open '{pdbPath}' for writing: Fake IOException{Environment.NewLine}", outWriter.ToString())
         End Sub
 
@@ -9585,7 +9585,7 @@ End Module
             Dim xmlPath = Path.Combine(Path.GetDirectoryName(srcPath), "test.xml")
             Dim vbc = New MockVisualBasicCompiler(_baseDirectory, {"/nologo", "/preferreduilang:en", $"/doc:{xmlPath}", srcPath})
             vbc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc:=
-                            Function(filePath, mode, access, share)
+                            Function(filePath, mode, access, share, fileAccessData)
                                 If filePath = xmlPath Then
                                     Return New TestStream(backingStream:=New MemoryStream(), dispose:=Sub() Throw New IOException("Fake IOException"))
                                 End If
@@ -9594,7 +9594,7 @@ End Module
                             End Function)
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Assert.Equal(1, vbc.Run(outWriter))
+            Assert.Equal(1, vbc.Run(outWriter, Nothing))
             Assert.Equal($"vbc : error BC2012: can't open '{xmlPath}' for writing: Fake IOException{Environment.NewLine}", outWriter.ToString())
         End Sub
 
@@ -9606,7 +9606,7 @@ End Module
             Dim sourceLinkPath = Path.Combine(Path.GetDirectoryName(srcPath), "test.json")
             Dim vbc = New MockVisualBasicCompiler(_baseDirectory, {"/nologo", "/preferreduilang:en", "/debug:" & format, $"/sourcelink:{sourceLinkPath}", srcPath})
             vbc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc:=
-                            Function(filePath, mode, access, share)
+                            Function(filePath, mode, access, share, fileAccessData)
                                 If filePath = sourceLinkPath Then
                                     Return New TestStream(
                                    backingStream:=New MemoryStream(Encoding.UTF8.GetBytes("
@@ -9623,7 +9623,7 @@ End Module
                             End Function)
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Assert.Equal(1, vbc.Run(outWriter))
+            Assert.Equal(1, vbc.Run(outWriter, Nothing))
             Assert.Equal($"vbc : error BC2012: can't open '{sourceLinkPath}' for writing: Fake IOException{Environment.NewLine}", outWriter.ToString())
         End Sub
 
@@ -9672,7 +9672,7 @@ End Module
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
 
             Dim vbc = New MockVisualBasicCompiler(Nothing, dir.Path, args)
-            Dim exitCode = vbc.Run(outWriter)
+            Dim exitCode = vbc.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
 
             Dim exePath = Path.Combine(dir.Path, "a.exe")
@@ -9720,7 +9720,7 @@ End Class").Path
             })
 
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = compiler.Run(outWriter)
+            Dim exitCode = compiler.Run(outWriter, Nothing)
             Assert.Equal(1, exitCode)
             Assert.Contains("vbc : error BC37253: The pathmap option was incorrectly formatted.", outWriter.ToString(), StringComparison.Ordinal)
         End Sub
@@ -10152,7 +10152,7 @@ End Class")
 
             Dim cmd = New MockVisualBasicCompiler(Nothing, dir.Path, args, analyzer)
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = cmd.Run(outWriter)
+            Dim exitCode = cmd.Run(outWriter, Nothing)
             Assert.Equal(0, exitCode)
             Dim output = outWriter.ToString()
 
@@ -10187,7 +10187,7 @@ End Class")
 
             Dim cmd = New MockVisualBasicCompiler(Nothing, dir.Path, args, analyzer)
             Dim outWriter = New StringWriter(CultureInfo.InvariantCulture)
-            Dim exitCode = cmd.Run(outWriter)
+            Dim exitCode = cmd.Run(outWriter, Nothing)
             Dim expectedExitCode = If(Not analyzerShouldBeSkipped AndAlso defaultSeverity = DiagnosticSeverity.[Error], 1, 0)
             Assert.Equal(expectedExitCode, exitCode)
 

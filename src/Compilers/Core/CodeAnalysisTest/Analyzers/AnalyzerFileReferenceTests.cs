@@ -322,7 +322,7 @@ namespace Microsoft.CodeAnalysis.UnitTests
                 new DefaultAnalyzerAssemblyLoader());
 
             var writer = new StringWriter();
-            var result = compiler.Run(writer);
+            var result = compiler.Run(writer, out _);
             Assert.Equal(0, result);
             AssertEx.Equal($"""
                 warning CS9057: The analyzer assembly '{_testFixture.AnalyzerWithLaterFakeCompilerDependency}' references version '100.0.0.0' of the compiler, which is newer than the currently running version '{typeof(DefaultAnalyzerAssemblyLoader).Assembly.GetName().Version}'.
@@ -351,7 +351,7 @@ namespace Microsoft.CodeAnalysis.UnitTests
                 new DefaultAnalyzerAssemblyLoader());
 
             var writer = new StringWriter();
-            var result = compiler.Run(writer);
+            var result = compiler.Run(writer, out _);
             Assert.Equal(0, result);
             AssertEx.Equal($"""
                 warning CS9067: Analyzer reference '{_testFixture.AnalyzerWithFakeCompilerDependency}' specified multiple times

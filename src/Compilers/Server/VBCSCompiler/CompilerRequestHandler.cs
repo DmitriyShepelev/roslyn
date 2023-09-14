@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CommandLine;
+using Roslyn.Utilities;
 
 using static Microsoft.CodeAnalysis.CommandLine.CompilerServerLogger;
 
@@ -150,13 +151,14 @@ Run Compilation for {request.RequestId}
             {
                 bool utf8output = compiler.Arguments.Utf8Output;
                 TextWriter output = new StringWriter(CultureInfo.InvariantCulture);
-                int returnCode = compiler.Run(output, cancellationToken);
+                int returnCode = compiler.Run(output, out IReadOnlyList<FileAccessDataSlim>? fileAccessData, cancellationToken);
                 var outputString = output.ToString();
                 Logger.Log(@$"End {request.RequestId} {request.Language} compiler run
 Return code: {returnCode}
 Output:
-{outputString}");
-                return new CompletedBuildResponse(returnCode, utf8output, outputString);
+{outputString}
+File access data: {string.Join(";", fileAccessData!)}");
+                return new CompletedBuildResponse(returnCode, utf8output, outputString, fileAccessData!);
             }
             catch (Exception ex)
             {

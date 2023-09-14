@@ -18,7 +18,7 @@ namespace Roslyn.Test.Utilities
         internal static (int Result, string Output) Run(this CommonCompiler compiler, CancellationToken cancellationToken = default)
         {
             using var writer = new StringWriter();
-            var result = compiler.Run(writer, cancellationToken);
+            var result = compiler.Run(writer, out _, cancellationToken);
             return (result, writer.ToString());
         }
     }

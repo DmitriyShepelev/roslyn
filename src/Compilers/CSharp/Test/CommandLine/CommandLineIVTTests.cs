@@ -38,7 +38,7 @@ public class CommandLineIVTTests : CommandLineTestBase
             source2.Path,
         }, additionalReferences: new[] { comp1.ToMetadataReference() });
 
-        var errorCode = compiler.Run(sw);
+        var errorCode = compiler.Run(sw, out _);
 
         Assert.Equal(CommonCompiler.Failed, errorCode);
         var outputFilePath = $"{Path.GetFileName(dir.Path)}{Path.DirectorySeparatorChar}{Path.GetFileName(source2.Path)}";
@@ -115,7 +115,7 @@ Assembly reference: 'N1, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null'
             source2.Path,
         }, additionalReferences: new[] { comp1.ToMetadataReference() });
 
-        var errorCode = compiler.Run(sw);
+        var errorCode = compiler.Run(sw, out _);
 
         Assert.Equal(CommonCompiler.Succeeded, errorCode);
         var outputFilePath = $"{Path.GetFileName(dir.Path)}{Path.DirectorySeparatorChar}{Path.GetFileName(source2.Path)}";
@@ -194,7 +194,7 @@ Assembly reference: 'N1, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null'
             source2.Path,
         }, additionalReferences: new[] { comp1.ToMetadataReference() });
 
-        var errorCode = compiler.Run(sw);
+        var errorCode = compiler.Run(sw, out _);
 
         Assert.Equal(CommonCompiler.Failed, errorCode);
         var outputFilePath = $"{Path.GetFileName(dir.Path)}{Path.DirectorySeparatorChar}{Path.GetFileName(source2.Path)}";
@@ -279,7 +279,7 @@ Assembly reference: 'N1, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null'
             source2.Path,
         }, additionalReferences: new[] { comp1.ToMetadataReference() });
 
-        var errorCode = compiler.Run(sw);
+        var errorCode = compiler.Run(sw, out _);
 
         Assert.Equal(CommonCompiler.Failed, errorCode);
         var outputFilePath = $"{Path.GetFileName(dir.Path)}{Path.DirectorySeparatorChar}{Path.GetFileName(source2.Path)}";

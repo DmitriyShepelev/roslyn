@@ -380,29 +380,36 @@ namespace Microsoft.CodeAnalysis.CommandLine
     /// <summary>
     /// Represents a Response from the server. A response is as follows.
     /// 
-    ///  Field Name         Type            Size (bytes)
-    /// --------------------------------------------------
-    ///  Length             UInteger        4
-    ///  ReturnCode         Integer         4
-    ///  Output             String          Variable
+    ///  Field Name         Type                                   Size (bytes)
+    /// ------------------------------------------------------------------------
+    ///  Length             UInteger                               4
+    ///  ReturnCode         Integer                                4
+    ///  Output             String                                 Variable
+    ///  FileAccessData     IReadOnlyList of FileAccessDataSlim    Variable
     /// 
     /// Strings are encoded via a character count prefix as a 
     /// 32-bit integer, followed by an array of characters.
     /// 
+    /// FileAccessData are encoded via the list length (an int), followed by 
+    /// the RequestedAccess (a byte), process id (a uint), DesiredAccess (a uint),
+    /// and path (a string) for each item.
     /// </summary>
     internal sealed class CompletedBuildResponse : BuildResponse
     {
         public readonly int ReturnCode;
         public readonly bool Utf8Output;
         public readonly string Output;
+        public readonly IReadOnlyList<FileAccessDataSlim> FileAccessData;
 
         public CompletedBuildResponse(int returnCode,
                                       bool utf8output,
-                                      string? output)
+                                      string? output,
+                                      IReadOnlyList<FileAccessDataSlim> fileAccessData)
         {
             ReturnCode = returnCode;
             Utf8Output = utf8output;
             Output = output ?? string.Empty;
+            FileAccessData = fileAccessData;
         }
 
         public override ResponseType Type => ResponseType.Completed;
@@ -412,7 +419,8 @@ namespace Microsoft.CodeAnalysis.CommandLine
             var returnCode = reader.ReadInt32();
             var utf8Output = reader.ReadBoolean();
             var output = ReadLengthPrefixedString(reader);
-            return new CompletedBuildResponse(returnCode, utf8Output, output);
+            IReadOnlyList<FileAccessDataSlim> fileAccessData = ReadFileAccessData(reader);
+            return new CompletedBuildResponse(returnCode, utf8Output, output, fileAccessData);
         }
 
         protected override void AddResponseBody(BinaryWriter writer)
@@ -420,6 +428,7 @@ namespace Microsoft.CodeAnalysis.CommandLine
             writer.Write(ReturnCode);
             writer.Write(Utf8Output);
             WriteLengthPrefixedString(writer, Output);
+            WriteFileAccessData(writer, FileAccessData);
         }
     }
 
@@ -602,6 +611,46 @@ namespace Microsoft.CodeAnalysis.CommandLine
             else
             {
                 writer.Write(-1);
+            }
+        }
+
+        /// <summary>
+        /// Reads a list of <see cref="FileAccessDataSlim"/>s. The list length is first read, followed by
+        /// the <see cref="RequestedAccess"/>, process id, <see cref="DesiredAccess"/>, and path for each <see cref="FileAccessDataSlim"/>.
+        /// </summary>
+        /// <param name="reader">The reader to read the list of <see cref="FileAccessDataSlim"/>s.</param>
+        /// <returns>The list of <see cref="FileAccessDataSlim"/>s.</returns>
+        public static IReadOnlyList<FileAccessDataSlim> ReadFileAccessData(BinaryReader reader)
+        {
+            int numFileAccessData = reader.ReadInt32();
+            var fileAccessData = new List<FileAccessDataSlim>(numFileAccessData);
+            for (int i = 0; i < numFileAccessData; i++)
+            {
+                fileAccessData.Add(new FileAccessDataSlim(
+                    (RequestedAccess)reader.ReadByte(),
+                    reader.ReadUInt32(),
+                    (DesiredAccess)reader.ReadUInt32(),
+                    reader.ReadString()));
+            }
+
+            return fileAccessData;
+        }
+
+        /// <summary>
+        /// Writes a list of <see cref="FileAccessDataSlim"/>s. The list length is first written, followed by
+        /// the <see cref="RequestedAccess"/>, process id, <see cref="DesiredAccess"/>, and path for each <see cref="FileAccessDataSlim"/>.
+        /// </summary>
+        /// <param name="writer">The writer to write the list of <see cref="FileAccessDataSlim"/>s.</param>
+        /// <param name="fileAccessDataList">The list of <see cref="FileAccessDataSlim"/>s to write.</param>
+        public static void WriteFileAccessData(BinaryWriter writer, IReadOnlyList<FileAccessDataSlim> fileAccessDataList)
+        {
+            writer.Write(fileAccessDataList.Count);
+            foreach (FileAccessDataSlim fileAccessData in fileAccessDataList)
+            {
+                writer.Write((byte)fileAccessData.RequestedAccess);
+                writer.Write(fileAccessData.ProcessId);
+                writer.Write((uint)fileAccessData.DesiredAccess);
+                writer.Write(fileAccessData.Path);
             }
         }
 

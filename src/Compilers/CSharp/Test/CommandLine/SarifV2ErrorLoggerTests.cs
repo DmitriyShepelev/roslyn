@@ -451,7 +451,7 @@ class C
                analyzers: new[] { new AnalyzerForErrorLogTest() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             // Assert no diagnostics are reported as the analyzer has been disabled with nowarn.
@@ -533,7 +533,7 @@ dotnet_diagnostic.ID1.severity = none
                analyzers: new[] { new AnalyzerForErrorLogTest() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             // Assert suppressed/disabled diagnostics are not reported on the command line.
@@ -603,7 +603,7 @@ class C
                analyzers: new DiagnosticAnalyzer[] { new AnalyzerForErrorLogTest(), new SuppressorForErrorLogTest() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             // Assert suppressed/disabled diagnostics are not reported on the command line.

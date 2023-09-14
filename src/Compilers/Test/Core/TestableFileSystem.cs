@@ -10,15 +10,16 @@ using Roslyn.Utilities;
 
 namespace Roslyn.Test.Utilities
 {
-    public delegate Stream OpenFileExFunc(string filePath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, out string normalizedFilePath);
-    public delegate Stream OpenFileFunc(string filePath, FileMode mode, FileAccess access, FileShare share);
+    internal delegate Stream OpenFileExFunc(string filePath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, out string normalizedFilePath, List<FileAccessDataSlim>? fileAccessData = null);
+    internal delegate Stream OpenFileFunc(string filePath, FileMode mode, FileAccess access, FileShare share, List<FileAccessDataSlim>? fileAccessData = null);
 
-    public sealed class TestableFileSystem : ICommonCompilerFileSystem
+    internal sealed class TestableFileSystem : ICommonCompilerFileSystem
     {
         private readonly Dictionary<string, TestableFile>? _map;
 
         public OpenFileFunc OpenFileFunc { get; private set; } = delegate { throw new InvalidOperationException(); };
-        public OpenFileExFunc OpenFileExFunc { get; private set; } = (string _, FileMode _, FileAccess _, FileShare _, int _, FileOptions _, out string _) => throw new InvalidOperationException();
+        public OpenFileExFunc OpenFileExFunc { get; private set; } =
+            (string _, FileMode _, FileAccess _, FileShare _, int _, FileOptions _, out string _, List<FileAccessDataSlim>? _) => throw new InvalidOperationException();
         public Func<string, bool> FileExistsFunc { get; private set; } = delegate { throw new InvalidOperationException(); };
 
         public Dictionary<string, TestableFile> Map => _map ?? throw new InvalidOperationException();
@@ -29,10 +30,18 @@ namespace Roslyn.Test.Utilities
             _map = map;
         }
 
-        public Stream OpenFile(string filePath, FileMode mode, FileAccess access, FileShare share)
+        public Stream OpenFile(string filePath, FileMode mode, FileAccess access, FileShare share, List<FileAccessDataSlim>? fileAccessData = null)
             => OpenFileFunc(filePath, mode, access, share);
 
-        public Stream OpenFileEx(string filePath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, out string normalizedFilePath)
+        public Stream OpenFileEx(
+            string filePath,
+            FileMode mode,
+            FileAccess access,
+            FileShare share,
+            int bufferSize,
+            FileOptions options,
+            out string normalizedFilePath,
+            List<FileAccessDataSlim>? fileAccessData = null)
             => OpenFileExFunc(filePath, mode, access, share, bufferSize, options, out normalizedFilePath);
 
         public bool FileExists(string filePath) => FileExistsFunc(filePath);
@@ -74,13 +83,13 @@ namespace Roslyn.Test.Utilities
         public static TestableFileSystem CreateForMap(Dictionary<string, TestableFile> map)
             => new TestableFileSystem(map)
             {
-                OpenFileExFunc = (string filePath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, out string normalizedFilePath) =>
+                OpenFileExFunc = (string filePath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, out string normalizedFilePath, List<FileAccessDataSlim>? fileAccessData = null) =>
                 {
                     normalizedFilePath = filePath;
                     return map[filePath].GetStream(access);
                 },
 
-                OpenFileFunc = (string filePath, FileMode mode, FileAccess access, FileShare share) => map[filePath].GetStream(access),
+                OpenFileFunc = (string filePath, FileMode mode, FileAccess access, FileShare share, List<FileAccessDataSlim>? fileAccessData = null) => map[filePath].GetStream(access),
                 FileExistsFunc = filePath => map.ContainsKey(filePath),
             };
     }

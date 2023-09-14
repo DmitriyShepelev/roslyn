@@ -19,12 +19,36 @@ namespace Microsoft.CodeAnalysis.CompilerServer
         private readonly Func<string, MetadataReferenceProperties, PortableExecutableReference> _metadataProvider;
 
         internal VisualBasicCompilerServer(Func<string, MetadataReferenceProperties, PortableExecutableReference> metadataProvider, string[] args, BuildPaths buildPaths, string? libDirectory, IAnalyzerAssemblyLoader analyzerLoader, GeneratorDriverCache driverCache)
-            : this(metadataProvider, Path.Combine(buildPaths.ClientDirectory, ResponseFileName), args, buildPaths, libDirectory, analyzerLoader, driverCache)
+            : this(
+                  metadataProvider,
+                  Path.Combine(buildPaths.ClientDirectory, ResponseFileName),
+                  args,
+                  buildPaths,
+                  libDirectory,
+                  analyzerLoader,
+                  driverCache,
+                  new List<FileAccessDataSlim>())
         {
         }
 
-        internal VisualBasicCompilerServer(Func<string, MetadataReferenceProperties, PortableExecutableReference> metadataProvider, string? responseFile, string[] args, BuildPaths buildPaths, string? libDirectory, IAnalyzerAssemblyLoader analyzerLoader, GeneratorDriverCache driverCache)
-            : base(VisualBasicCommandLineParser.Default, responseFile, args, buildPaths, libDirectory, analyzerLoader, driverCache)
+        internal VisualBasicCompilerServer(
+            Func<string, MetadataReferenceProperties, PortableExecutableReference> metadataProvider,
+            string? responseFile,
+            string[] args,
+            BuildPaths buildPaths,
+            string? libDirectory,
+            IAnalyzerAssemblyLoader analyzerLoader,
+            GeneratorDriverCache driverCache,
+            List<FileAccessDataSlim>? fileAccessData = null)
+            : base(
+                  VisualBasicCommandLineParser.Default,
+                  responseFile,
+                  args,
+                  buildPaths,
+                  libDirectory,
+                  analyzerLoader,
+                  driverCache,
+                  fileAccessData: fileAccessData)
         {
             _metadataProvider = metadataProvider;
         }

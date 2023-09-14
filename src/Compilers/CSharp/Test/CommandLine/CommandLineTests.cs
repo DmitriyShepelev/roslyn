@@ -147,7 +147,7 @@ public class P {
             var cmd = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/errorlog:errorlog", $"/doc:{docName}", "/warnaserror", src.Path });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString());
 
@@ -167,7 +167,7 @@ public class P {
             var cmd = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/t:library", "/preferreduilang:en", $"/doc:{docName}", src.Path });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString());
 
@@ -175,7 +175,7 @@ public class P {
             using (var fileStream = new FileStream(xmlPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var mmf = MemoryMappedFile.CreateFromFile(fileStream, "xmlMap", 0, MemoryMappedFileAccess.Read, HandleInheritability.None, leaveOpen: true))
             {
-                exitCode = cmd.Run(outWriter);
+                exitCode = cmd.Run(outWriter, out _);
                 Assert.StartsWith($"error CS0016: Could not write to output file '{xmlPath}' -- ", outWriter.ToString());
                 Assert.Equal(1, exitCode);
             }
@@ -203,7 +203,7 @@ dotnet_diagnostic.cs0169.severity = none");
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths));
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString());
 
@@ -241,7 +241,7 @@ my_option2 = my_val2");
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths));
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal("", outWriter.ToString());
             Assert.Equal(0, exitCode);
 
@@ -291,7 +291,7 @@ dotnet_diagnostic.cs0169.severity = garbage");
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths));
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal(
 $@"warning InvalidSeverityInAnalyzerConfig: The diagnostic 'cs0169' was given an invalid severity 'garbage' in the analyzer config file at '{analyzerConfig.Path}'.
@@ -327,7 +327,7 @@ dotnet_diagnostic.cs0169.severity = suppress";
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal(
                 $"error CS8700: Multiple analyzer config files cannot be in the same directory ('{dir.Path}').",
@@ -346,7 +346,7 @@ dotnet_diagnostic.cs0169.severity = suppress";
             Assert.Null(cmd.Arguments.Encoding);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString());
 
@@ -366,7 +366,7 @@ dotnet_diagnostic.cs0169.severity = suppress";
             Assert.Equal(932, cmd.Arguments.Encoding?.WindowsCodePage);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString());
 
@@ -525,7 +525,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/nosdkpath", "/r:System.dll", "a.cs" });
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS0006: Metadata file 'System.dll' could not be found", outWriter.ToString().Trim());
@@ -632,22 +632,22 @@ class C
             CreateFile(folderB, "B_c.cpx");
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, folder.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", @"/recurse:.", "/out:abc.dll" }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, folder.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", @"/recurse:.", "/out:abc.dll" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("warning CS2008: No source files specified.", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, folder.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", @"/recurse:.  ", "/out:abc.dll" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, folder.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", @"/recurse:.  ", "/out:abc.dll" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("warning CS2008: No source files specified.", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, folder.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", @"/recurse:  .  ", "/out:abc.dll" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, folder.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", @"/recurse:  .  ", "/out:abc.dll" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("warning CS2008: No source files specified.", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, folder.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", @"/recurse:././.", "/out:abc.dll" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, folder.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", @"/recurse:././.", "/out:abc.dll" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("warning CS2008: No source files specified.", outWriter.ToString().Trim());
 
@@ -1814,7 +1814,7 @@ class C
             var dir = Temp.CreateDirectory();
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/langversion:?" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var expected = Enum.GetValues(typeof(LanguageVersion)).Cast<LanguageVersion>()
@@ -2188,7 +2188,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/debug:embedded", "/sourcelink:sl.json", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var peStream = File.OpenRead(Path.Combine(dir.Path, "a.exe"));
@@ -2220,7 +2220,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/debug:portable", "/sourcelink:sl.json", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var pdbStream = File.OpenRead(Path.Combine(dir.Path, "a.pdb"));
@@ -2249,7 +2249,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/debug:full", "/sourcelink:sl.json", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var pdbStream = File.OpenRead(Path.Combine(dir.Path, "a.pdb"));
@@ -2392,7 +2392,7 @@ print Goodbye, World";
 
             var output = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", debugSwitch, embedSwitch, "embed.cs", "embed2.cs" });
-            int exitCode = csc.Run(output);
+            int exitCode = csc.Run(output, out _);
             Assert.Equal("", output.ToString().Trim());
             Assert.Equal(0, exitCode);
 
@@ -2670,7 +2670,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/a:missing.dll", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS0006: Metadata file 'missing.dll' could not be found", outWriter.ToString().Trim());
 
@@ -2693,7 +2693,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", "/a:" + typeof(object).Assembly.Location, "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.DoesNotContain("warning", outWriter.ToString());
 
@@ -2810,7 +2810,7 @@ class C
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             // This assembly has a MockAbstractDiagnosticAnalyzer type which should get run by this compilation.
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", "/a:" + Assembly.GetExecutingAssembly().Location, "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             // Diagnostic thrown
             Assert.True(outWriter.ToString().Contains("a.cs(2,7): warning Warning01: Throwing a diagnostic for types declared"));
@@ -2846,7 +2846,7 @@ class C
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             // This assembly has a MockAbstractDiagnosticAnalyzer type which should get run by this compilation.
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", "/a:" + Assembly.GetExecutingAssembly().Location, "a.cs", "/ruleset:" + ruleSetFile.Path });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             // Diagnostic thrown as error.
             Assert.True(outWriter.ToString().Contains("a.cs(2,7): error Warning01: Throwing a diagnostic for types declared"));
@@ -2883,7 +2883,7 @@ class C
                     "/nologo", "/preferreduilang:en", "/t:library",
                     "/a:" + Assembly.GetExecutingAssembly().Location, "a.cs",
                     "/ruleset:" + ruleSetFile.Path, "/warnaserror+", "/nowarn:8032" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             // Diagnostic thrown as error: command line always overrides ruleset.
             Assert.Contains("a.cs(2,7): error Warning01: Throwing a diagnostic for types declared", outWriter.ToString(), StringComparison.Ordinal);
@@ -2894,7 +2894,7 @@ class C
                     "/nologo", "/preferreduilang:en", "/t:library",
                     "/a:" + Assembly.GetExecutingAssembly().Location, "a.cs",
                     "/warnaserror+", "/ruleset:" + ruleSetFile.Path, "/nowarn:8032" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             // Diagnostic thrown as error: command line always overrides ruleset.
             Assert.Contains("a.cs(2,7): error Warning01: Throwing a diagnostic for types declared", outWriter.ToString(), StringComparison.Ordinal);
@@ -3402,7 +3402,7 @@ class C
                     "/nologo", "/t:library",
                     "/a:" + Assembly.GetExecutingAssembly().Location, "a.cs",
                     "/ruleset:" + ruleSetFile.Path, "/warn:0" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             // Diagnostic suppressed: commandline always overrides ruleset.
             Assert.DoesNotContain("Warning01", outWriter.ToString(), StringComparison.Ordinal);
@@ -3413,7 +3413,7 @@ class C
                     "/nologo", "/t:library",
                     "/a:" + Assembly.GetExecutingAssembly().Location, "a.cs",
                     "/warn:0", "/ruleset:" + ruleSetFile.Path });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             // Diagnostic suppressed: commandline always overrides ruleset.
             Assert.DoesNotContain("Warning01", outWriter.ToString(), StringComparison.Ordinal);
@@ -3467,7 +3467,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
 
             // with /fullpaths off
@@ -3495,7 +3495,7 @@ a.cs(32,13): error CS0103: The name 'Goo' does not exist in the current context
             // with /fullpaths on
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/t:library", "/fullpaths", "a.cs" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
 
             expected = @"
@@ -4236,7 +4236,7 @@ C:\*.cs(100,7): error CS0103: The name 'Goo' does not exist in the current conte
                         "/r:" + silverlight,
                         "/r:" + net4_0dll,
                         "/appconfig:" + appConfigFile.Path,
-                        srcFile.Path }).Run(outWriter);
+                        srcFile.Path }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
@@ -4255,7 +4255,7 @@ C:\*.cs(100,7): error CS0103: The name 'Goo' does not exist in the current conte
             var exitCode = CreateCSharpCompiler(null, srcDirectory,
                 new[] { "/nologo", "/preferreduilang:en",
                         $@"/appconfig:{root}DoesNotExist\NOwhere\bonobo.exe.config" ,
-                        srcFile.Path }).Run(outWriter);
+                        srcFile.Path }).Run(outWriter, out _);
             Assert.NotEqual(0, exitCode);
             Assert.Equal($@"error CS7093: Cannot read config file '{root}DoesNotExist\NOwhere\bonobo.exe.config' -- 'Could not find a part of the path '{root}DoesNotExist\NOwhere\bonobo.exe.config'.'", outWriter.ToString().Trim());
 
@@ -4376,7 +4376,7 @@ C:\*.cs(100,7): error CS0103: The name 'Goo' does not exist in the current conte
             var exeName = "aa.exe";
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/modulename:hocusPocus ", "/out:" + exeName + " ", file1.Path });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             if (exitCode != 0)
             {
                 Console.WriteLine(outWriter.ToString());
@@ -4635,12 +4635,12 @@ C:\*.cs(100,7): error CS0103: The name 'Goo' does not exist in the current conte
             src.WriteAllText("public class C{}");
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, subDirectory, new[] { "/nologo", "/t:library", "/out:abc.xyz", src.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, subDirectory, new[] { "/nologo", "/t:library", "/out:abc.xyz", src.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, baseDirectory, new[] { "/nologo", "/lib:temp", "/r:abc.xyz", "/t:library", src.ToString() }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, baseDirectory, new[] { "/nologo", "/lib:temp", "/r:abc.xyz", "/t:library", src.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
@@ -4658,7 +4658,7 @@ C:\*.cs(100,7): error CS0103: The name 'Goo' does not exist in the current conte
             src.WriteAllText("public class C{}");
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, baseDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", "/out:" + subFolder.ToString(), src.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, baseDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", "/out:" + subFolder.ToString(), src.ToString() }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.True(outWriter.ToString().Trim().StartsWith("error CS2012: Cannot open '" + subFolder.ToString() + "' for writing -- '", StringComparison.Ordinal)); // Cannot create a file when that file already exists.
 
@@ -5765,26 +5765,26 @@ class Test { static void Main() {} }").Path;
             var baseDir = Path.GetDirectoryName(source);
             // === Scenario 1 ===
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/t:module", source1 }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/t:module", source1 }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var modfile = source1.Substring(0, source1.Length - 2) + "netmodule";
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var parsedArgs = DefaultParse(new[] { "/nologo", "/addmodule:" + modfile, source }, WorkingDirectory);
             parsedArgs.Errors.Verify();
-            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/addmodule:" + modfile, source }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/addmodule:" + modfile, source }).Run(outWriter, out _);
             Assert.Empty(outWriter.ToString());
 
             // === Scenario 2 ===
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/t:module", source2 }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/t:module", source2 }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             modfile = source2.Substring(0, source2.Length - 2) + "netmodule";
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             parsedArgs = DefaultParse(new[] { "/nologo", "/addmodule:" + modfile, source }, WorkingDirectory);
             parsedArgs.Errors.Verify();
-            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", "/addmodule:" + modfile, source }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", "/addmodule:" + modfile, source }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             // Dev11: CS0647 (Emit)
             Assert.Contains("error CS7061: Duplicate 'CompilationRelaxationsAttribute' attribute in", outWriter.ToString(), StringComparison.Ordinal);
@@ -5802,12 +5802,12 @@ class Test { static void Main() {} }").Path;
             var baseDir = Path.GetDirectoryName(source2);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/t:module", source1 }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/t:module", source1 }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var modfile = source1.Substring(0, source1.Length - 2) + "netmodule";
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/addmodule:" + modfile, source2 }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/addmodule:" + modfile, source2 }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             CleanupAllGeneratedFiles(source1);
@@ -5822,12 +5822,12 @@ class Test { static void Main() {} }").Path;
             var baseDir = Path.GetDirectoryName(source2);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/t:module", source1 }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/t:module", source1 }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var modfile = source1.Substring(0, source1.Length - 2) + "netmodule";
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", "/addmodule:" + modfile, "/linkres:" + modfile, source2 }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", "/addmodule:" + modfile, "/linkres:" + modfile, source2 }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             // Native gives CS0013 at emit stage
             Assert.Equal("error CS7041: Each linked resource and module must have a unique filename. Filename '" + Path.GetFileName(modfile) + "' is specified more than once in this assembly", outWriter.ToString().Trim());
@@ -6199,7 +6199,7 @@ public class CS1698_a {}
             var binaryPath = Temp.CreateFile().WriteAllBytes(ResourcesNet451.mscorlib).Path;
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", binaryPath });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal(
                 "error CS2015: '" + binaryPath + "' is a binary file instead of a text file",
@@ -6291,7 +6291,7 @@ class myClass
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             // csc errors_whitespace_008.cs @errors_whitespace_008.cs.rsp
             var csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS1680: Invalid reference alias option: 'myAlias=' -- missing filename", outWriter.ToString().Trim());
 
@@ -6390,7 +6390,7 @@ class myClass
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             // csc errors_whitespace_008.cs @errors_whitespace_008.cs.rsp
             var csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS1680: Invalid reference alias option: 'myAlias=' -- missing filename", outWriter.ToString().Trim());
 
@@ -6432,7 +6432,7 @@ class myClass
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             // csc errors_whitespace_008.cs @errors_whitespace_008.cs.rsp
             var csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             CleanupAllGeneratedFiles(source);
@@ -6473,7 +6473,7 @@ class myClass
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             // csc errors_whitespace_008.cs @errors_whitespace_008.cs.rsp
             var csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
 
             CleanupAllGeneratedFiles(source);
@@ -6808,7 +6808,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/target:exe", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.NotEqual(0, exitCode);
             Assert.Equal("error CS5001: Program does not contain a static 'Main' method suitable for an entry point", outWriter.ToString().Trim());
 
@@ -6830,7 +6830,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/target:exe", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.NotEqual(0, exitCode);
 
             // If "error" was localized, below assert will fail on PLOC builds. The output would be something like: "!pTCvB!vbc : !FLxft!error 表! CS5001:"
@@ -6854,7 +6854,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/target:library", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal(@"",
                 outWriter.ToString().Trim());
@@ -6877,7 +6877,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/target:library", "/preferreduilang:en", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var patched = Regex.Replace(outWriter.ToString().Trim(), "version \\d+\\.\\d+\\.\\d+(-[\\w\\d]+)*", "version A.B.C-d");
@@ -6935,7 +6935,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.".Trim(),
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, commandLineArguments.Concat(new[] { inputName1, inputName2 }).ToArray());
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             if (exitCode != 0)
             {
                 Console.WriteLine(outWriter.ToString());
@@ -6979,7 +6979,7 @@ class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { "/nologo", "/preferreduilang:en", "/r:missing.dll", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS0006: Metadata file 'missing.dll' could not be found", outWriter.ToString().Trim());
 
@@ -7055,7 +7055,7 @@ public class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, commandLineArguments.Concat(new[] { fileName }).ToArray());
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             return exitCode;
         }
@@ -7078,7 +7078,7 @@ public class C
             file.WriteAllText(source);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { fileName, "/preferreduilang:en", "/target:exe", "/out:sub\\a.exe" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Contains("error CS2012: Cannot open '" + dir.Path + "\\sub\\a.exe' for writing", outWriter.ToString(), StringComparison.Ordinal);
@@ -7104,7 +7104,7 @@ public class C
             file.WriteAllText(source);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { fileName, "/preferreduilang:en", "/target:exe", "/out:sub\\" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             var message = outWriter.ToString();
@@ -7132,7 +7132,7 @@ public class C
             file.WriteAllText(source);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { fileName, "/preferreduilang:en", "/target:exe", "/out:sub\\ " });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             var message = outWriter.ToString();
@@ -7160,7 +7160,7 @@ public class C
             file.WriteAllText(source);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { fileName, "/preferreduilang:en", "/target:exe", "/out:aaa:\\a.exe" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Contains(@"error CS2021: File name 'aaa:\a.exe' is empty, contains invalid characters, has a drive specification without an absolute path, or is too long", outWriter.ToString(), StringComparison.Ordinal);
@@ -7186,7 +7186,7 @@ public class C
             file.WriteAllText(source);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path, new[] { fileName, "/preferreduilang:en", "/target:exe", "/out: " });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Contains("error CS2005: Missing file specification for '/out:' option", outWriter.ToString(), StringComparison.Ordinal);
@@ -7678,7 +7678,7 @@ class C
                 });
             }
 
-            int actualExitCode = csc.Run(new StringWriter(CultureInfo.InvariantCulture));
+            int actualExitCode = csc.Run(new StringWriter(CultureInfo.InvariantCulture), out _);
 
             Assert.Equal(0, actualExitCode);
 
@@ -7724,28 +7724,28 @@ public class C
             // Checks the base case without /noconfig (expect to see error)
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("error CS0168: The variable 'x' is declared but never used\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
             // Checks the case with /noconfig (expect to see warning, instead of error)
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/noconfig", "/preferreduilang:en" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS0168: The variable 'x' is declared but never used\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
             // Checks the case with /NOCONFIG (expect to see warning, instead of error)
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/NOCONFIG", "/preferreduilang:en" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS0168: The variable 'x' is declared but never used\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
             // Checks the case with -noconfig (expect to see warning, instead of error)
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "-noconfig", "/preferreduilang:en" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS0168: The variable 'x' is declared but never used\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -7771,7 +7771,7 @@ public class C
             // Checks the case with /noconfig inside the response file (expect to see warning)
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS2023: Ignoring /noconfig option because it was specified in a response file\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -7779,7 +7779,7 @@ public class C
             // to verify that this warning is not suppressed by the /nowarn option (See MSDN).
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en", "/nowarn:2023" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS2023: Ignoring /noconfig option because it was specified in a response file\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -7805,7 +7805,7 @@ public class C
             // Checks the case with /noconfig inside the response file (expect to see warning)
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS2023: Ignoring /noconfig option because it was specified in a response file\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -7813,7 +7813,7 @@ public class C
             // to verify that this warning is not suppressed by the /nowarn option (See MSDN).
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en", "/nowarn:2023" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS2023: Ignoring /noconfig option because it was specified in a response file\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -7839,7 +7839,7 @@ public class C
             // Checks the case with /noconfig inside the response file (expect to see warning)
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS2023: Ignoring /noconfig option because it was specified in a response file\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -7847,7 +7847,7 @@ public class C
             // to verify that this warning is not suppressed by the /nowarn option (See MSDN).
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(rsp, WorkingDirectory, new[] { source, "/preferreduilang:en", "/nowarn:2023" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains("warning CS2023: Ignoring /noconfig option because it was specified in a response file\r\n", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -7863,12 +7863,12 @@ public class C
             src.WriteAllText("public class C{}");
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/t:library", src.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/t:library", src.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/nostdlib", "/t:library", src.ToString() }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/nostdlib", "/t:library", src.ToString() }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("{FILE}(1,14): error CS0518: Predefined type 'System.Object' is not defined or imported",
                          outWriter.ToString().Replace(Path.GetFileName(src.Path), "{FILE}").Trim());
@@ -7876,7 +7876,7 @@ public class C
             // Bug#15021: breaking change - empty source no error with /nostdlib
             src.WriteAllText("namespace System { }");
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/nostdlib", "/t:library", "/runtimemetadataversion:v4.0.30319", "/langversion:8", src.ToString() }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/nostdlib", "/t:library", "/runtimemetadataversion:v4.0.30319", "/langversion:8", src.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
@@ -8017,12 +8017,12 @@ namespace System
             src.WriteAllText(source + mslib);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/noconfig", "/nostdlib", "/runtimemetadataversion:v4.0.30319", "/nowarn:8625", "/features:noRefSafetyRulesAttribute", src.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/noconfig", "/nostdlib", "/runtimemetadataversion:v4.0.30319", "/nowarn:8625", "/features:noRefSafetyRulesAttribute", src.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/nostdlib", "/runtimemetadataversion:v4.0.30319", "/nowarn:8625", "/features:noRefSafetyRulesAttribute", src.ToString() }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/nostdlib", "/runtimemetadataversion:v4.0.30319", "/nowarn:8625", "/features:noRefSafetyRulesAttribute", src.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
             string OriginalSource = src.Path;
@@ -8030,7 +8030,7 @@ namespace System
             src = Temp.CreateFile("NoStdLib02b.cs");
             src.WriteAllText(mslib);
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(GetDefaultResponseFilePath(), WorkingDirectory, new[] { "/nologo", "/noconfig", "/nostdlib", "/t:library", "/runtimemetadataversion:v4.0.30319", "/nowarn:8625", "/features:noRefSafetyRulesAttribute", src.ToString() }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(GetDefaultResponseFilePath(), WorkingDirectory, new[] { "/nologo", "/noconfig", "/nostdlib", "/t:library", "/runtimemetadataversion:v4.0.30319", "/nowarn:8625", "/features:noRefSafetyRulesAttribute", src.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
@@ -8046,50 +8046,50 @@ namespace System
             src.WriteAllText("public class C{}");
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", src.ToString(), "/define" }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", src.ToString(), "/define" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS2006: Command-line syntax error: Missing '<text>' for '/define' option", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), @"/define:""""" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), @"/define:""""" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("warning CS2029: Invalid name for a preprocessing symbol; '' is not a valid identifier", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define: " }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define: " }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS2006: Command-line syntax error: Missing '<text>' for '/define:' option", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS2006: Command-line syntax error: Missing '<text>' for '/define:' option", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:,,," }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:,,," }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("warning CS2029: Invalid name for a preprocessing symbol; '' is not a valid identifier", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:,blah,Blah" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:,blah,Blah" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("warning CS2029: Invalid name for a preprocessing symbol; '' is not a valid identifier", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:a;;b@" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:a;;b@" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             var errorLines = outWriter.ToString().Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
             Assert.Equal("warning CS2029: Invalid name for a preprocessing symbol; '' is not a valid identifier", errorLines[0]);
             Assert.Equal("warning CS2029: Invalid name for a preprocessing symbol; 'b@' is not a valid identifier", errorLines[1]);
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:a,b@;" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), "/define:a,b@;" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("warning CS2029: Invalid name for a preprocessing symbol; 'b@' is not a valid identifier", outWriter.ToString().Trim());
 
             //Bug 531612 - Native would normally not give the 2nd warning
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), @"/define:OE_WIN32=-1:LANG_HOST_EN=-1:LANG_OE_EN=-1:LANG_PRJ_EN=-1:HOST_COM20SDKEVERETT=-1:EXEMODE=-1:OE_NT5=-1:Win32=-1", @"/d:TRACE=TRUE,DEBUG=TRUE" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/t:library", src.ToString(), @"/define:OE_WIN32=-1:LANG_HOST_EN=-1:LANG_OE_EN=-1:LANG_PRJ_EN=-1:HOST_COM20SDKEVERETT=-1:EXEMODE=-1:OE_NT5=-1:Win32=-1", @"/d:TRACE=TRUE,DEBUG=TRUE" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             errorLines = outWriter.ToString().Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
             Assert.Equal(@"warning CS2029: Invalid name for a preprocessing symbol; 'OE_WIN32=-1:LANG_HOST_EN=-1:LANG_OE_EN=-1:LANG_PRJ_EN=-1:HOST_COM20SDKEVERETT=-1:EXEMODE=-1:OE_NT5=-1:Win32=-1' is not a valid identifier", errorLines[0]);
@@ -8259,7 +8259,7 @@ public class C
             //      a.cs(6,16): warning CS0168: The variable 'x' is declared but never used
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, baseDir, new[] { source, "/preferreduilang:en" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains(fileName + "(6,16): warning CS0168: The variable 'x' is declared but never used", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -8268,7 +8268,7 @@ public class C
             //      example\a.cs(6,16): warning CS0168: The variable 'x' is declared but never used
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(null, Directory.GetParent(baseDir).FullName, new[] { source, "/preferreduilang:en" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains(fileName + "(6,16): warning CS0168: The variable 'x' is declared but never used", outWriter.ToString(), StringComparison.Ordinal);
             Assert.DoesNotContain(source, outWriter.ToString(), StringComparison.Ordinal);
@@ -8278,7 +8278,7 @@ public class C
             //      c:\test\a.cs(6,16): warning CS0168: The variable 'x' is declared but never used
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(null, Temp.CreateDirectory().Path, new[] { source, "/preferreduilang:en" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains(source + "(6,16): warning CS0168: The variable 'x' is declared but never used", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -8287,7 +8287,7 @@ public class C
             //      c:\temp\a.cs(6,16): warning CS0168: The variable 'x' is declared but never used
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(null, baseDir, new[] { source, "/fullpaths", "/preferreduilang:en" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains(source + @"(6,16): warning CS0168: The variable 'x' is declared but never used", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -8296,7 +8296,7 @@ public class C
             //      c:\temp\example\a.cs(6,16): warning CS0168: The variable 'x' is declared but never used
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(null, Directory.GetParent(baseDir).FullName, new[] { source, "/preferreduilang:en", "/fullpaths" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains(source + "(6,16): warning CS0168: The variable 'x' is declared but never used", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -8305,7 +8305,7 @@ public class C
             //      c:\test\a.cs(6,16): warning CS0168: The variable 'x' is declared but never used
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
             csc = CreateCSharpCompiler(null, Temp.CreateDirectory().Path, new[] { source, "/preferreduilang:en", "/fullpaths" });
-            exitCode = csc.Run(outWriter);
+            exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Contains(source + "(6,16): warning CS0168: The variable 'x' is declared but never used", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -8392,17 +8392,17 @@ static void Main() {
             var fileName = Path.GetFileName(source);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", source.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", source.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal(Path.GetFileName(source) + "(7,17): warning CS1634: Expected 'disable' or 'restore'", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/nowarn:1634", source.ToString() }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/nowarn:1634", source.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", Path.Combine(baseDir, "nonexistent.cs"), source.ToString() }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", Path.Combine(baseDir, "nonexistent.cs"), source.ToString() }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS2001: Source file '" + Path.Combine(baseDir, "nonexistent.cs") + "' could not be found.", outWriter.ToString().Trim());
 
@@ -8431,7 +8431,7 @@ class Test
             var fileName = Path.GetFileName(source);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/nowarn:1522,642", source.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/nowarn:1522,642", source.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
@@ -8455,7 +8455,7 @@ public class C
             var fileName = Path.GetFileName(source);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", "/warn:3", "/warnaserror:nullable", source.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", "/warn:3", "/warnaserror:nullable", source.ToString() }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal(
 $@"{fileName}(4,18): error CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.", outWriter.ToString().Trim());
@@ -8489,7 +8489,7 @@ public class Test
             var fileName = Path.GetFileName(source);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", "/warn:3", "/warnaserror", source.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, baseDir, new[] { "/nologo", "/preferreduilang:en", "/warn:3", "/warnaserror", source.ToString() }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Equal(
 $@"{fileName}(12,20): error CS1522: Empty switch block
@@ -8515,7 +8515,7 @@ $@"{fileName}(12,20): error CS1522: Empty switch block
                 "/preferreduilang:en",
                 "/win32res:" + badres,
                 source
-            }).Run(outWriter);
+            }).Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS1583: Error reading Win32 resources -- Image is too small.", outWriter.ToString().Trim());
@@ -8540,7 +8540,7 @@ $@"{fileName}(12,20): error CS1522: Empty switch block
                 "/preferreduilang:en",
                 "/win32res:" + badres,
                 source
-            }).Run(outWriter);
+            }).Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS1583: Error reading Win32 resources -- Unrecognized resource file format.", outWriter.ToString().Trim());
@@ -8561,7 +8561,7 @@ static void Main() { }
             var fileName = Path.GetFileName(source);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/target:library", "/out:goo.dll", "/nowarn:2008" }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/target:library", "/out:goo.dll", "/nowarn:2008" }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
@@ -8582,12 +8582,12 @@ class Program
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
             // Repro case 1
-            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/warnaserror", source.ToString() }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/warnaserror", source.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
             // Repro case 2
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/nowarn:1998", source.ToString() }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/nowarn:1998", source.ToString() }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
@@ -8635,13 +8635,13 @@ class Program3
                 stream.Write(buffer, 0, buffer.Length);
             }
 
-            int exitCode1 = CreateCSharpCompiler(null, dir.Path, new[] { "/debug:full", "/out:Program.exe", source1.Path }).Run(outWriter);
+            int exitCode1 = CreateCSharpCompiler(null, dir.Path, new[] { "/debug:full", "/out:Program.exe", source1.Path }).Run(outWriter, out _);
             Assert.NotEqual(0, exitCode1);
 
             ValidateZeroes(exe.Path, oldSize);
             ValidateZeroes(pdb.Path, oldSize);
 
-            int exitCode2 = CreateCSharpCompiler(null, dir.Path, new[] { "/debug:full", "/out:Program.exe", source2.Path }).Run(outWriter);
+            int exitCode2 = CreateCSharpCompiler(null, dir.Path, new[] { "/debug:full", "/out:Program.exe", source2.Path }).Run(outWriter, out _);
             Assert.Equal(0, exitCode2);
 
             using (var peFile = File.OpenRead(exe.Path))
@@ -8652,7 +8652,7 @@ class Program3
             Assert.True(new FileInfo(exe.Path).Length < oldSize);
             Assert.True(new FileInfo(pdb.Path).Length < oldSize);
 
-            int exitCode3 = CreateCSharpCompiler(null, dir.Path, new[] { "/debug:full", "/out:Program.exe", source3.Path }).Run(outWriter);
+            int exitCode3 = CreateCSharpCompiler(null, dir.Path, new[] { "/debug:full", "/out:Program.exe", source3.Path }).Run(outWriter, out _);
             Assert.Equal(0, exitCode3);
 
             using (var peFile = File.OpenRead(exe.Path))
@@ -8697,7 +8697,7 @@ class Program3
             var fsPdb = new FileStream(libPdb.Path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, dir.Path, new[] { "/target:library", "/debug:full", libSrc.Path }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, dir.Path, new[] { "/target:library", "/debug:full", libSrc.Path }).Run(outWriter, out _);
             if (exitCode != 0)
             {
                 AssertEx.AssertEqualToleratingWhitespaceDifferences("", outWriter.ToString());
@@ -8804,7 +8804,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             var fsDll = new FileStream(libDll.Path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, dir.Path, new[] { "/target:library", "/preferreduilang:en", libSrc.Path }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, dir.Path, new[] { "/target:library", "/preferreduilang:en", libSrc.Path }).Run(outWriter, out _);
             Assert.Contains($"error CS2012: Cannot open '{libDll.Path}' for writing", outWriter.ToString());
 
             AssertEx.Equal(new[] { (byte)'D', (byte)'L', (byte)'L' }, ReadBytes(libDll.Path, 3));
@@ -8823,7 +8823,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             var libDll = dir.CreateDirectory("Lib.dll");
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, dir.Path, new[] { "/target:library", "/preferreduilang:en", libSrc.Path }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, dir.Path, new[] { "/target:library", "/preferreduilang:en", libSrc.Path }).Run(outWriter, out _);
             Assert.Contains($"error CS2012: Cannot open '{libDll.Path}' for writing", outWriter.ToString());
         }
 
@@ -8848,7 +8848,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             var srcPath = MakeTrivialExe(Temp.CreateDirectory().Path);
             var exePath = Path.Combine(Path.GetDirectoryName(srcPath), "test.exe");
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", $"/out:{exePath}", srcPath });
-            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share) =>
+            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share, _) =>
             {
                 if (file == exePath)
                 {
@@ -8860,7 +8860,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            Assert.Equal(1, csc.Run(outWriter));
+            Assert.Equal(1, csc.Run(outWriter, out _));
             Assert.Contains($"error CS0016: Could not write to output file '{exePath}' -- 'Fake IOException'{Environment.NewLine}", outWriter.ToString());
         }
 
@@ -8871,7 +8871,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             var exePath = Path.Combine(Path.GetDirectoryName(srcPath), "test.exe");
             var pdbPath = Path.ChangeExtension(exePath, "pdb");
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/debug", $"/out:{exePath}", srcPath });
-            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share) =>
+            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share, _) =>
             {
                 if (file == pdbPath)
                 {
@@ -8883,7 +8883,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            Assert.Equal(1, csc.Run(outWriter));
+            Assert.Equal(1, csc.Run(outWriter, out _));
             Assert.Contains($"error CS0016: Could not write to output file '{pdbPath}' -- 'Fake IOException'{Environment.NewLine}", outWriter.ToString());
         }
 
@@ -8893,7 +8893,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             var srcPath = MakeTrivialExe(Temp.CreateDirectory().Path);
             var xmlPath = Path.Combine(Path.GetDirectoryName(srcPath), "test.xml");
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", $"/doc:{xmlPath}", srcPath });
-            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share) =>
+            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share, _) =>
             {
                 if (file == xmlPath)
                 {
@@ -8905,7 +8905,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            Assert.Equal(1, csc.Run(outWriter));
+            Assert.Equal(1, csc.Run(outWriter, out _));
             Assert.Equal($"error CS0016: Could not write to output file '{xmlPath}' -- 'Fake IOException'{Environment.NewLine}", outWriter.ToString());
         }
 
@@ -8917,7 +8917,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             var srcPath = MakeTrivialExe(Temp.CreateDirectory().Path);
             var sourceLinkPath = Path.Combine(Path.GetDirectoryName(srcPath), "test.json");
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/debug:" + format, $"/sourcelink:{sourceLinkPath}", srcPath });
-            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share) =>
+            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share, _) =>
             {
                 if (file == sourceLinkPath)
                 {
@@ -8935,7 +8935,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            Assert.Equal(1, csc.Run(outWriter));
+            Assert.Equal(1, csc.Run(outWriter, out _));
             Assert.Equal($"error CS0016: Could not write to output file '{sourceLinkPath}' -- 'Fake IOException'{Environment.NewLine}", outWriter.ToString());
         }
 
@@ -8945,7 +8945,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             string sourcePath = MakeTrivialExe();
             string exePath = Path.Combine(Path.GetDirectoryName(sourcePath), "test.exe");
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", $"/out:{exePath}", sourcePath });
-            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share) =>
+            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share, _) =>
             {
                 if (file == exePath)
                 {
@@ -8956,7 +8956,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            Assert.Equal(1, csc.Run(outWriter));
+            Assert.Equal(1, csc.Run(outWriter, out _));
             Assert.Contains($"error CS2012: Cannot open '{exePath}' for writing", outWriter.ToString());
 
             System.IO.File.Delete(sourcePath);
@@ -8971,7 +8971,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             string exePath = Path.Combine(Path.GetDirectoryName(sourcePath), "test.exe");
             string pdbPath = Path.ChangeExtension(exePath, ".pdb");
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/debug-", $"/out:{exePath}", sourcePath });
-            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share) =>
+            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share, _) =>
             {
                 if (file == pdbPath)
                 {
@@ -8982,7 +8982,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            Assert.Equal(0, csc.Run(outWriter));
+            Assert.Equal(0, csc.Run(outWriter, out _));
 
             System.IO.File.Delete(sourcePath);
             System.IO.File.Delete(exePath);
@@ -8996,7 +8996,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             string sourcePath = MakeTrivialExe();
             string xmlPath = Path.Combine(WorkingDirectory, "Test.xml");
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/preferreduilang:en", "/doc:" + xmlPath, sourcePath });
-            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share) =>
+            csc.FileSystem = TestableFileSystem.CreateForStandard(openFileFunc: (file, mode, access, share, _) =>
             {
                 if (file == xmlPath)
                 {
@@ -9009,7 +9009,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.", output);
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             var expectedOutput = string.Format("error CS0016: Could not write to output file '{0}' -- 'I/O error occurred.'", xmlPath);
             Assert.Equal(expectedOutput, outWriter.ToString().Trim());
@@ -9074,7 +9074,7 @@ public class C
             string sourcePath = Temp.CreateFile(prefix: "", extension: ".cs").WriteAllText(source).Path;
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", sourcePath }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", sourcePath }).Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             var cscOutput = outWriter.ToString().Trim();
 
@@ -9101,7 +9101,7 @@ public class C { }
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/target:library", "/out:Test.dll", "/doc:" + xmlPath, sourcePath });
 
             var writer = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = csc.Run(writer);
+            var exitCode = csc.Run(writer, out _);
             if (exitCode != 0)
             {
                 Console.WriteLine(writer.ToString());
@@ -9238,7 +9238,7 @@ public class C { }
             DefaultParse(allCommandLineArgs, baseDirectory).Errors.Verify(parseDiagnostics);
 
             // Verify compile.
-            int exitCode = CreateCSharpCompiler(null, baseDirectory, allCommandLineArgs).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, baseDirectory, allCommandLineArgs).Run(outWriter, out _);
             Assert.Equal(expectedExitCode, exitCode);
 
             if (parseDiagnostics.IsEmpty())
@@ -9302,7 +9302,7 @@ public class C { }
                 new[] { "/reportanalyzer", "/t:library", srcFile.Path },
                 analyzers: new[] { new WarningDiagnosticAnalyzer() },
                 generators: new[] { new DoNothingGenerator().AsSourceGenerator() });
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             var output = outWriter.ToString();
             Assert.Contains(CodeAnalysisResources.AnalyzerExecutionTimeColumnHeader, output, StringComparison.Ordinal);
@@ -9394,7 +9394,7 @@ public class C { }
                 srcDirectory,
                 new[] { "/reportanalyzer", "/t:library", srcFile.Path },
                 analyzers: analyzers);
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             var output = outWriter.ToString();
             if (skipAnalyzers)
@@ -9428,7 +9428,7 @@ class C { }
                 analyzers: new[] { new WarningDiagnosticAnalyzer() });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
 
             // Previously, the compiler would return error code 1 without printing any diagnostics
             Assert.Empty(outWriter.ToString());
@@ -9449,7 +9449,7 @@ class C { }
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/t:library", srcFile.Path },
                analyzers: new[] { new AnalyzerThatThrowsInGetMessage() });
 
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             var output = outWriter.ToString();
 
@@ -9474,7 +9474,7 @@ class C { }
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/t:library", $"/warnaserror:{AnalyzerExecutor.AnalyzerExceptionDiagnosticId}", srcFile.Path },
                analyzers: new[] { new AnalyzerThatThrowsInGetMessage() });
 
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
             Assert.NotEqual(0, exitCode);
             var output = outWriter.ToString();
 
@@ -9496,7 +9496,7 @@ class C { }
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/t:library", srcFile.Path },
                analyzers: new[] { new AnalyzerReportingMisformattedDiagnostic() });
 
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             var output = outWriter.ToString();
 
@@ -9544,37 +9544,37 @@ using System*
         public void PreferredUILang()
         {
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang" }).Run(outWriter);
+            int exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("CS2006", outWriter.ToString(), StringComparison.Ordinal);
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("CS2006", outWriter.ToString(), StringComparison.Ordinal);
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:zz" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:zz" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("CS2038", outWriter.ToString(), StringComparison.Ordinal);
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:en-zz" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:en-zz" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("CS2038", outWriter.ToString(), StringComparison.Ordinal);
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:en-US" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:en-US" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.DoesNotContain("CS2038", outWriter.ToString(), StringComparison.Ordinal);
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:de" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:de" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.DoesNotContain("CS2038", outWriter.ToString(), StringComparison.Ordinal);
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:de-AT" }).Run(outWriter);
+            exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/preferreduilang:de-AT" }).Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.DoesNotContain("CS2038", outWriter.ToString(), StringComparison.Ordinal);
         }
@@ -9584,7 +9584,7 @@ using System*
         public void EmptyFileName()
         {
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "" }).Run(outWriter);
+            var exitCode = CreateCSharpCompiler(null, WorkingDirectory, new[] { "" }).Run(outWriter, out _);
             Assert.NotEqual(0, exitCode);
 
             // error CS2021: File name '' is empty, contains invalid characters, has a drive specification without an absolute path, or is too long
@@ -9600,7 +9600,7 @@ using System.Diagnostics; // Unused.
 ").Path;
             var cmd = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/nologo", "/target:library", filePath });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString().Trim());
 
@@ -9693,19 +9693,19 @@ using System.Diagnostics; // Unused.
             // make sure reserved device names don't
             var cmd = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/r:com2.dll", "/target:library", "/preferreduilang:en", filePath });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("error CS0006: Metadata file 'com2.dll' could not be found", outWriter.ToString(), StringComparison.Ordinal);
 
             cmd = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/link:..\\lpt8.dll", "/target:library", "/preferreduilang:en", filePath });
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = cmd.Run(outWriter);
+            exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("error CS0006: Metadata file '..\\lpt8.dll' could not be found", outWriter.ToString(), StringComparison.Ordinal);
 
             cmd = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/lib:aux", "/preferreduilang:en", filePath });
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = cmd.Run(outWriter);
+            exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("warning CS1668: Invalid search path 'aux' specified in '/LIB option' -- 'directory does not exist'", outWriter.ToString(), StringComparison.Ordinal);
 
@@ -9894,7 +9894,7 @@ public class Program
                 if (featureOpt != null) args = args.Concat(featureOpt).ToArray();
                 var compiler = CreateCSharpCompiler(null, WorkingDirectory, args);
                 var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-                int exitCode = compiler.Run(outWriter);
+                int exitCode = compiler.Run(outWriter, out _);
                 return (exitCode, outWriter.ToString());
             };
         }
@@ -9936,7 +9936,7 @@ public class Program
                 if (featureOpt != null) args = args.Concat(featureOpt).ToArray();
                 var compiler = CreateCSharpCompiler(null, WorkingDirectory, args);
                 var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-                int exitCode = compiler.Run(outWriter);
+                int exitCode = compiler.Run(outWriter, out _);
                 return outWriter.ToString().Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
             };
         }
@@ -10399,7 +10399,7 @@ class C
 
             var csc = CreateCSharpCompiler(null, sourceDir.Path, args, analyzers: analyzers, generators: generators, driverCache: driverCache);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
             var output = outWriter.ToString();
 
             expectedExitCode ??= expectedErrorCount > 0 ? 1 : 0;
@@ -11018,7 +11018,7 @@ class C
         {
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/keyfile:", "/target:library", "/nologo", "/preferreduilang:en", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS2005: Missing file specification for 'keyfile' option", outWriter.ToString().Trim());
@@ -11030,7 +11030,7 @@ class C
         {
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/keyfile:\"\"", "/target:library", "/nologo", "/preferreduilang:en", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS2005: Missing file specification for 'keyfile' option", outWriter.ToString().Trim());
@@ -11042,7 +11042,7 @@ class C
         {
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/keyfile:", "/publicsign", "/target:library", "/nologo", "/preferreduilang:en", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS2005: Missing file specification for 'keyfile' option", outWriter.ToString().Trim());
@@ -11054,7 +11054,7 @@ class C
         {
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, WorkingDirectory, new[] { "/keyfile:\"\"", "/publicsign", "/target:library", "/nologo", "/preferreduilang:en", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
 
             Assert.Equal(1, exitCode);
             Assert.Equal("error CS2005: Missing file specification for 'keyfile' option", outWriter.ToString().Trim());
@@ -11436,7 +11436,7 @@ class C {
                 var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
                 var csc = CreateCSharpCompiler(null, dir.Path, args);
-                int exitCode = csc.Run(outWriter);
+                int exitCode = csc.Run(outWriter, out _);
                 Assert.Equal(0, exitCode);
 
                 var exePath = Path.Combine(dir.Path, "a.exe");
@@ -11616,7 +11616,7 @@ public class C
             var csc = CreateCSharpCompiler(null, dir.Path,
                 new[] { "/nologo", "/out:a.exe", "/refout:ref/a.dll", "/doc:doc.xml", "/deterministic", "/langversion:7", "a.cs" });
 
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var exe = Path.Combine(dir.Path, "a.exe");
@@ -11680,7 +11680,7 @@ public class C
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path,
                 new[] { "/nologo", "/out:a.dll", "/refout:ref/a.dll", "/deterministic", "/preferreduilang:en", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
 
             var dll = Path.Combine(dir.Path, "a.dll");
@@ -11731,7 +11731,7 @@ class C
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
             var csc = CreateCSharpCompiler(null, dir.Path,
                 new[] { "/nologo", "/out:a.dll", "/refonly", "/debug", "/deterministic", "/langversion:7", "/doc:doc.xml", "a.cs" });
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal("", outWriter.ToString());
             Assert.Equal(0, exitCode);
 
@@ -12107,7 +12107,7 @@ public class TestAnalyzer : DiagnosticAnalyzer
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
             var csc = CreateCSharpCompiler(null, dir.Path, args);
-            int exitCode = csc.Run(outWriter);
+            int exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             var exePath = Path.Combine(dir.Path, "a.exe");
@@ -12299,7 +12299,7 @@ public class TestAnalyzer : DiagnosticAnalyzer
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = compiler.Run(outWriter);
+            var exitCode = compiler.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("error CS8101: The pathmap option was incorrectly formatted.", outWriter.ToString(), StringComparison.Ordinal);
         }
@@ -12319,7 +12319,7 @@ public class TestAnalyzer : DiagnosticAnalyzer
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = compiler.Run(outWriter);
+            var exitCode = compiler.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.Contains("error CS2021: File name 'test\\?.pdb' is empty, contains invalid characters, has a drive specification without an absolute path, or is too long", outWriter.ToString(), StringComparison.Ordinal);
         }
@@ -12904,7 +12904,7 @@ dotnet_analyzer_diagnostic.severity = suggestion";
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths));
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
 
             var expectedErrorCode = expectedDiagnosticSeverity == ReportDiagnostic.Error ? 1 : 0;
             Assert.Equal(expectedErrorCode, exitCode);
@@ -13145,7 +13145,7 @@ dotnet_diagnostic.{descriptor.Id}.severity = {analyzerConfigSeverity.ToAnalyzerC
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths));
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
 
             var expectedErrorCode = !noWarn && analyzerConfigSeverity == ReportDiagnostic.Error ? 1 : 0;
             Assert.Equal(expectedErrorCode, exitCode);
@@ -13231,7 +13231,7 @@ generated_code = auto");
 
             var cmd = CreateCSharpCompiler(null, dir.Path, args, analyzers: new[] { analyzer });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             var output = outWriter.ToString();
             if (analyzerShouldBeSkipped)
@@ -13267,7 +13267,7 @@ generated_code = auto");
 
             var cmd = CreateCSharpCompiler(null, dir.Path, args, analyzers: new[] { analyzer });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var expectedExitCode = !analyzerShouldBeSkipped && defaultSeverity == DiagnosticSeverity.Error ? 1 : 0;
             Assert.Equal(expectedExitCode, exitCode);
 
@@ -13938,7 +13938,7 @@ key7 = value7");
 
             var cmd = CreateCSharpCompiler(null, dir.Path, args, generators: new[] { generator });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
 
             // test for both the original tree and the generated one
@@ -14000,7 +14000,7 @@ class C
                 new[] { "/t:library", "/nologo", "/warnaserror+", src.Path },
                 generators: new[] { new FailsExecuteGenerator() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.StartsWith($"error CS8785: Generator 'FailsExecuteGenerator' failed to generate source. It will not contribute to the output and compilation errors may occur as a result. Exception was of type 'Exception' with message 'THROW'",
                 outWriter.ToString());
@@ -14020,7 +14020,7 @@ class C
                 new[] { "/t:library", "/nologo", "/nowarn:CS8785", src.Path },
                 generators: new[] { new FailsExecuteGenerator() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString());
         }
@@ -14045,7 +14045,7 @@ class C
                 new[] { "/t:library", "/nologo", "/warnaserror+", src.Path },
                 generators: new[] { new FailsInitializeGenerator() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
             Assert.StartsWith($"error CS8784: Generator 'FailsInitializeGenerator' failed to initialize. It will not contribute to the output and compilation errors may occur as a result. Exception was of type 'Exception' with message 'THROW'",
                 outWriter.ToString());
@@ -14065,7 +14065,7 @@ class C
                 new[] { "/t:library", "/nologo", "/nowarn:CS8784", src.Path },
                 generators: new[] { new FailsInitializeGenerator() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString());
         }
@@ -14144,7 +14144,7 @@ class C
                 WorkingDirectory,
                 new[] { "/nologo", "/t:library", srcFile.Path },
                analyzers: new[] { new FieldAnalyzer() }); // at least one analyzer required
-            var exitCode = csc.Run(outWriter);
+            var exitCode = csc.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             var output = outWriter.ToString();
             Assert.Empty(output);
@@ -14177,7 +14177,7 @@ is_global = true
             });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
         }
 
@@ -14259,7 +14259,7 @@ key3 = value3");
                 src.Path });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal("", outWriter.ToString());
             Assert.Equal(0, exitCode);
 
@@ -14780,7 +14780,7 @@ dotnet_diagnostic.DiagID1.severity = none
                 src.Path });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
 
             // With editorconfig
@@ -14794,7 +14794,7 @@ dotnet_diagnostic.DiagID1.severity = none
             Assert.Equal(analyzerConfig.Path, Assert.Single(cmd.Arguments.AnalyzerConfigPaths));
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = cmd.Run(outWriter);
+            exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
             Assert.Equal("", outWriter.ToString());
         }
@@ -14832,7 +14832,7 @@ public class C
                src.Path });
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(1, exitCode);
 
             // With nowarn
@@ -14844,7 +14844,7 @@ public class C
                src.Path });
 
             outWriter = new StringWriter(CultureInfo.InvariantCulture);
-            exitCode = cmd.Run(outWriter);
+            exitCode = cmd.Run(outWriter, out _);
             Assert.Equal(0, exitCode);
         }
 

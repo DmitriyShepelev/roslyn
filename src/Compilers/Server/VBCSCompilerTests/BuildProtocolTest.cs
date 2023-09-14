@@ -5,12 +5,14 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CommandLine;
 using Roslyn.Test.Utilities;
+using Roslyn.Utilities;
 using Xunit;
 
 namespace Microsoft.CodeAnalysis.CompilerServer.UnitTests
@@ -30,7 +32,7 @@ namespace Microsoft.CodeAnalysis.CompilerServer.UnitTests
         [Fact]
         public async Task ReadWriteCompleted()
         {
-            var response = new CompletedBuildResponse(42, utf8output: false, output: "a string");
+            var response = new CompletedBuildResponse(42, utf8output: false, output: "a string", new List<FileAccessDataSlim>());
             var memoryStream = new MemoryStream();
             await response.WriteAsync(memoryStream, default(CancellationToken));
             Assert.True(memoryStream.Position > 0);

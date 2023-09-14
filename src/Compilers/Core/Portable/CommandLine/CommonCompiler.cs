@@ -91,6 +91,8 @@ namespace Microsoft.CodeAnalysis
 
         private readonly HashSet<Diagnostic> _reportedDiagnostics = new HashSet<Diagnostic>();
 
+        private readonly List<FileAccessDataSlim>? _fileAccessData;
+
         public abstract Compilation? CreateCompilation(
             TextWriter consoleOutput,
             TouchedFileLogger? touchedFilesLogger,
@@ -121,7 +123,16 @@ namespace Microsoft.CodeAnalysis
             out ImmutableArray<DiagnosticAnalyzer> analyzers,
             out ImmutableArray<ISourceGenerator> generators);
 
-        public CommonCompiler(CommandLineParser parser, string? responseFile, string[] args, BuildPaths buildPaths, string? additionalReferenceDirectories, IAnalyzerAssemblyLoader assemblyLoader, GeneratorDriverCache? driverCache, ICommonCompilerFileSystem? fileSystem)
+        public CommonCompiler(
+            CommandLineParser parser,
+            string? responseFile,
+            string[] args,
+            BuildPaths buildPaths,
+            string? additionalReferenceDirectories,
+            IAnalyzerAssemblyLoader assemblyLoader,
+            GeneratorDriverCache? driverCache,
+            ICommonCompilerFileSystem? fileSystem,
+            List<FileAccessDataSlim>? fileAccessData)
         {
             IEnumerable<string> allArgs = args;
 
@@ -137,6 +148,7 @@ namespace Microsoft.CodeAnalysis
             this.GeneratorDriverCache = driverCache;
             this.EmbeddedSourcePaths = GetEmbeddedSourcePaths(Arguments);
             this.FileSystem = fileSystem ?? StandardFileSystem.Instance;
+            _fileAccessData = fileAccessData;
         }
 
         internal abstract bool SuppressDefaultResponseFile(IEnumerable<string> args);
@@ -209,7 +221,7 @@ namespace Microsoft.CodeAnalysis
         {
             return (path, properties) =>
             {
-                var peStream = FileSystem.OpenFileWithNormalizedException(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var peStream = FileSystem.OpenFileWithNormalizedException(path, FileMode.Open, FileAccess.Read, FileShare.Read, _fileAccessData);
                 return MetadataReference.CreateFromFile(peStream, path, properties);
             };
         }
@@ -392,7 +404,8 @@ namespace Microsoft.CodeAnalysis
                 FileShare.ReadWrite,
                 bufferSize: 1,
                 options: FileOptions.None,
-                out normalizedFilePath);
+                out normalizedFilePath,
+                _fileAccessData);
 
         internal EmbeddedText? TryReadEmbeddedFileContent(string filePath, DiagnosticBag diagnostics)
         {
@@ -742,7 +755,7 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// csc.exe and vbc.exe entry point.
         /// </summary>
-        public virtual int Run(TextWriter consoleOutput, CancellationToken cancellationToken = default)
+        public virtual int Run(TextWriter consoleOutput, out IReadOnlyList<FileAccessDataSlim>? fileAccessData, CancellationToken cancellationToken = default)
         {
             var saveUICulture = CultureInfo.CurrentUICulture;
             SarifErrorLogger? errorLogger = null;
@@ -781,6 +794,7 @@ namespace Microsoft.CodeAnalysis
             }
             finally
             {
+                fileAccessData = _fileAccessData;
                 CultureInfo.CurrentUICulture = saveUICulture;
                 errorLogger?.Dispose();
             }
@@ -1329,7 +1343,7 @@ namespace Microsoft.CodeAnalysis
 
                             using (xmlStreamDisposerOpt)
                             {
-                                using (var win32ResourceStreamOpt = GetWin32Resources(FileSystem, MessageProvider, Arguments, compilation, diagnostics))
+                                using (var win32ResourceStreamOpt = GetWin32Resources(FileSystem, _fileAccessData, MessageProvider, Arguments, compilation, diagnostics))
                                 {
                                     if (HasUnsuppressableErrors(diagnostics))
                                     {
@@ -1557,7 +1571,7 @@ namespace Microsoft.CodeAnalysis
         {
             try
             {
-                return FileSystem.OpenFile(filePath, mode, access, share);
+                return FileSystem.OpenFile(filePath, mode, access, share, _fileAccessData);
             }
             catch (Exception e)
             {
@@ -1575,13 +1589,14 @@ namespace Microsoft.CodeAnalysis
             out IEnumerable<DiagnosticInfo> errors)
         {
             var diagnostics = DiagnosticBag.GetInstance();
-            var stream = GetWin32Resources(fileSystem, messageProvider, arguments, compilation, diagnostics);
+            var stream = GetWin32Resources(fileSystem, null, messageProvider, arguments, compilation, diagnostics);
             errors = diagnostics.ToReadOnlyAndFree().SelectAsArray(diag => new DiagnosticInfo(messageProvider, diag.IsWarningAsError, diag.Code, (object[])diag.Arguments));
             return stream;
         }
 
         private static Stream? GetWin32Resources(
             ICommonCompilerFileSystem fileSystem,
+            List<FileAccessDataSlim>? fileAccessData,
             CommonMessageProvider messageProvider,
             CommandLineArguments arguments,
             Compilation compilation,
@@ -1589,12 +1604,12 @@ namespace Microsoft.CodeAnalysis
         {
             if (arguments.Win32ResourceFile != null)
             {
-                return OpenStream(fileSystem, messageProvider, arguments.Win32ResourceFile, arguments.BaseDirectory, messageProvider.ERR_CantOpenWin32Resource, diagnostics);
+                return OpenStream(fileSystem, fileAccessData, messageProvider, arguments.Win32ResourceFile, arguments.BaseDirectory, messageProvider.ERR_CantOpenWin32Resource, diagnostics);
             }
 
-            using (Stream? manifestStream = OpenManifestStream(fileSystem, messageProvider, compilation.Options.OutputKind, arguments, diagnostics))
+            using (Stream? manifestStream = OpenManifestStream(fileSystem, fileAccessData, messageProvider, compilation.Options.OutputKind, arguments, diagnostics))
             {
-                using (Stream? iconStream = OpenStream(fileSystem, messageProvider, arguments.Win32Icon, arguments.BaseDirectory, messageProvider.ERR_CantOpenWin32Icon, diagnostics))
+                using (Stream? iconStream = OpenStream(fileSystem, fileAccessData, messageProvider, arguments.Win32Icon, arguments.BaseDirectory, messageProvider.ERR_CantOpenWin32Icon, diagnostics))
                 {
                     try
                     {
@@ -1610,14 +1625,27 @@ namespace Microsoft.CodeAnalysis
             return null;
         }
 
-        private static Stream? OpenManifestStream(ICommonCompilerFileSystem fileSystem, CommonMessageProvider messageProvider, OutputKind outputKind, CommandLineArguments arguments, DiagnosticBag diagnostics)
+        private static Stream? OpenManifestStream(
+            ICommonCompilerFileSystem fileSystem,
+            List<FileAccessDataSlim>? fileAccessData,
+            CommonMessageProvider messageProvider,
+            OutputKind outputKind,
+            CommandLineArguments arguments,
+            DiagnosticBag diagnostics)
         {
             return outputKind.IsNetModule()
                 ? null
-                : OpenStream(fileSystem, messageProvider, arguments.Win32Manifest, arguments.BaseDirectory, messageProvider.ERR_CantOpenWin32Manifest, diagnostics);
+                : OpenStream(fileSystem, fileAccessData, messageProvider, arguments.Win32Manifest, arguments.BaseDirectory, messageProvider.ERR_CantOpenWin32Manifest, diagnostics);
         }
 
-        private static Stream? OpenStream(ICommonCompilerFileSystem fileSystem, CommonMessageProvider messageProvider, string? path, string? baseDirectory, int errorCode, DiagnosticBag diagnostics)
+        private static Stream? OpenStream(
+            ICommonCompilerFileSystem fileSystem,
+            List<FileAccessDataSlim>? fileAccessData,
+            CommonMessageProvider messageProvider,
+            string? path,
+            string? baseDirectory,
+            int errorCode,
+            DiagnosticBag diagnostics)
         {
             if (path == null)
             {
@@ -1632,7 +1660,7 @@ namespace Microsoft.CodeAnalysis
 
             try
             {
-                return fileSystem.OpenFile(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return fileSystem.OpenFile(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, fileAccessData);
             }
             catch (Exception ex)
             {
@@ -1682,7 +1710,7 @@ namespace Microsoft.CodeAnalysis
         {
             var key = compilation.GetDeterministicKey(additionalTexts, analyzers, generators, pathMap, emitOptions);
             var filePath = Path.Combine(Arguments.OutputDirectory, Arguments.OutputFileName + ".key");
-            using var stream = fileSystem.OpenFile(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            using var stream = fileSystem.OpenFile(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, _fileAccessData);
             var bytes = Encoding.UTF8.GetBytes(key);
             stream.Write(bytes, 0, bytes.Length);
         }

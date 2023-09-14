@@ -106,10 +106,13 @@ namespace Microsoft.CodeAnalysis
                 }
             }
 
-            private Stream OpenFileStream()
-            {
-                return _streamToDispose = _compiler.FileSystem.OpenFile(_filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-            }
+            private Stream OpenFileStream() =>
+                _streamToDispose = _compiler.FileSystem.OpenFile(
+                    _filePath,
+                    FileMode.Create,
+                    FileAccess.ReadWrite,
+                    FileShare.None,
+                    _compiler._fileAccessData);
 
             private void ReportOpenFileDiagnostic(DiagnosticBag diagnostics, Exception e)
             {

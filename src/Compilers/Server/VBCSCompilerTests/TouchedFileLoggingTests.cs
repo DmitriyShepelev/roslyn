@@ -77,7 +77,7 @@ End Class
                                   out expectedReads,
                                   out expectedWrites);
 
-                var exitCode = cmd.Run(outWriter);
+                var exitCode = cmd.Run(outWriter, out _);
 
                 Assert.Equal(string.Empty, outWriter.ToString().Trim());
                 Assert.Equal(0, exitCode);
@@ -127,7 +127,7 @@ End Class
                                   out expectedReads,
                                   out expectedWrites);
 
-                var exitCode = cmd.Run(outWriter);
+                var exitCode = cmd.Run(outWriter, out _);
 
                 Assert.Equal(string.Empty, outWriter.ToString().Trim());
                 Assert.Equal(0, exitCode);

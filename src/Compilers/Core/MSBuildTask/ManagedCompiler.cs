@@ -12,10 +12,13 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.FileAccess;
 using Microsoft.Build.Utilities;
 using Roslyn.Utilities;
 using Microsoft.CodeAnalysis.CommandLine;
 using Microsoft.Build.Tasks;
+using RequestedAccess = Microsoft.Build.Framework.FileAccess.RequestedAccess;
+using DesiredAccess = Microsoft.Build.Framework.FileAccess.DesiredAccess;
 
 namespace Microsoft.CodeAnalysis.BuildTasks
 {
@@ -659,6 +662,28 @@ namespace Microsoft.CodeAnalysis.BuildTasks
                     var completedResponse = (CompletedBuildResponse)response;
                     LogCompilerOutput(completedResponse.Output, StandardOutputImportanceToUse);
                     LogCompilationMessage(logger, requestId, CompilationKind.Server, "server processed compilation");
+
+                    // TODO: This logic assumes these types (such as FileAccessData) are defined in Microsoft.Build.Framework.
+                    // For this assumption to hold, the minimum supported version of Microsoft.Build.Framework would need to be
+                    // upgraded. Otherwise, reflection would be needed, which is not preferred.
+                    if (BuildEngine is IBuildEngine10 buildEngine10 && buildEngine10.EngineServices.Version >= EngineServices.Version2)
+                    {
+                        EngineServices engineServices = buildEngine10.EngineServices;
+                        foreach (FileAccessDataSlim fileAccessData in completedResponse.FileAccessData)
+                        {
+                            engineServices.ReportFileAccess(new FileAccessData(
+                                ReportedFileOperation.CreateFile,
+                                (RequestedAccess)fileAccessData.RequestedAccess,
+                                fileAccessData.ProcessId,
+                                0,
+                                (DesiredAccess)fileAccessData.DesiredAccess,
+                                FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
+                                fileAccessData.Path,
+                                null,
+                                true));
+                        }
+                    }
+
                     return completedResponse.ReturnCode;
 
                 case BuildResponse.ResponseType.MismatchedVersion:

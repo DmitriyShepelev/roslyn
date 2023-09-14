@@ -25,8 +25,27 @@ namespace Microsoft.CodeAnalysis.CSharp
         private readonly CommandLineDiagnosticFormatter _diagnosticFormatter;
         private readonly string? _tempDirectory;
 
-        protected CSharpCompiler(CSharpCommandLineParser parser, string? responseFile, string[] args, BuildPaths buildPaths, string? additionalReferenceDirectories, IAnalyzerAssemblyLoader assemblyLoader, GeneratorDriverCache? driverCache = null, ICommonCompilerFileSystem? fileSystem = null)
-            : base(parser, responseFile, args, buildPaths, additionalReferenceDirectories, assemblyLoader, driverCache, fileSystem)
+
+        protected CSharpCompiler(
+            CSharpCommandLineParser parser,
+            string? responseFile,
+            string[] args,
+            BuildPaths buildPaths,
+            string? additionalReferenceDirectories,
+            IAnalyzerAssemblyLoader assemblyLoader,
+            GeneratorDriverCache? driverCache = null,
+            ICommonCompilerFileSystem? fileSystem = null,
+            List<FileAccessDataSlim>? fileAccessData = null)
+            : base(
+                  parser,
+                  responseFile,
+                  args,
+                  buildPaths,
+                  additionalReferenceDirectories,
+                  assemblyLoader,
+                  driverCache,
+                  fileSystem,
+                  fileAccessData)
         {
             _diagnosticFormatter = new CommandLineDiagnosticFormatter(buildPaths.WorkingDirectory, Arguments.PrintFullPaths, Arguments.ShouldIncludeErrorEndLocation);
             _tempDirectory = buildPaths.TempDirectory;

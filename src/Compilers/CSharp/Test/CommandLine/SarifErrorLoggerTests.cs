@@ -47,7 +47,7 @@ class C
             var cmd = CreateCSharpCompiler(arguments);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
 
             Assert.Equal("", outWriter.ToString().Trim());
             Assert.Equal(0, exitCode);
@@ -78,7 +78,7 @@ public class C
             var cmd = CreateCSharpCompiler(null, WorkingDirectory, arguments);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             Assert.Contains("CS0169", actualConsoleOutput);
@@ -112,7 +112,7 @@ public class C
             var cmd = CreateCSharpCompiler(null, WorkingDirectory, arguments);
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             // Suppressed diagnostics are only reported in the error log, not the console output.
@@ -147,7 +147,7 @@ public class C
 
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             Assert.Contains(AnalyzerForErrorLogTest.Descriptor1.Id, actualConsoleOutput);
@@ -182,7 +182,7 @@ class C
                analyzers: new[] { new AnalyzerForErrorLogTest() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             // Suppressed diagnostics are only reported in the error log, not the console output.
@@ -217,7 +217,7 @@ class C
                analyzers: new[] { new AnalyzerForErrorLogTest() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             // Suppressed diagnostics are only reported in the error log, not the console output.
@@ -252,7 +252,7 @@ class C
                analyzers: new[] { new AnalyzerForErrorLogTest() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             // Suppressed diagnostics are only reported in the error log, not the console output.
@@ -287,7 +287,7 @@ class C
                analyzers: new[] { new AnalyzerForErrorLogTest() });
             var outWriter = new StringWriter(CultureInfo.InvariantCulture);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             var actualConsoleOutput = outWriter.ToString().Trim();
 
             // Suppressed diagnostics are only reported in the error log, not the console output.

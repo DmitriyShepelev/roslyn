@@ -40,7 +40,7 @@ End Class")
                 source2.Path
                 }, additionalReferences:={comp1.ToMetadataReference()})
 
-            Dim errorCode = compiler.Run(sw)
+            Dim errorCode = compiler.Run(sw, Nothing)
 
             Assert.Equal(1, errorCode)
 
@@ -141,7 +141,7 @@ End Class")
                 source2.Path
                 }, additionalReferences:={comp1.ToMetadataReference()})
 
-            Dim errorCode = compiler.Run(sw)
+            Dim errorCode = compiler.Run(sw, Nothing)
 
             Assert.Equal(1, errorCode)
 
@@ -242,7 +242,7 @@ End Class")
                 source2.Path
                 }, additionalReferences:={comp1.ToMetadataReference()})
 
-            Dim errorCode = compiler.Run(sw)
+            Dim errorCode = compiler.Run(sw, Nothing)
 
             Assert.Equal(1, errorCode)
 
@@ -353,7 +353,7 @@ End Module
                 source2.Path
                 }, additionalReferences:={comp1.ToMetadataReference()})
 
-            Dim errorCode = compiler.Run(sw)
+            Dim errorCode = compiler.Run(sw, Nothing)
 
             Assert.Equal(1, errorCode)
 
@@ -471,7 +471,7 @@ End Class")
                 source3.Path
                 }, additionalReferences:={comp1.ToMetadataReference(), comp2.ToMetadataReference()})
 
-            Dim errorCode = compiler.Run(sw)
+            Dim errorCode = compiler.Run(sw, Nothing)
 
             Assert.Equal(1, errorCode)
 

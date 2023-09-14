@@ -50,7 +50,7 @@ class C
                               Path.ChangeExtension(hello, "exe"),
                               out expectedReads,
                               out expectedWrites);
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
 
             Assert.Equal("", outWriter.ToString().Trim());
             Assert.Equal(0, exitCode);
@@ -97,7 +97,7 @@ class C
                               out expectedWrites);
             expectedReads.Add(appConfigPath);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
             Assert.Equal("", outWriter.ToString().Trim());
             Assert.Equal(0, exitCode);
             AssertTouchedFilesEqual(expectedReads,
@@ -130,7 +130,7 @@ class C
                               out expectedWrites);
             expectedReads.Add(snkPath);
 
-            var exitCode = cmd.Run(outWriter);
+            var exitCode = cmd.Run(outWriter, out _);
 
             Assert.Equal(string.Empty, outWriter.ToString().Trim());
             Assert.Equal(0, exitCode);
@@ -173,7 +173,7 @@ public class C { }").Path;
             expectedWrites.Add(xml.Path);
 
             var writer = new StringWriter(CultureInfo.InvariantCulture);
-            var exitCode = cmd.Run(writer);
+            var exitCode = cmd.Run(writer, out _);
             Assert.Equal(string.Empty, writer.ToString().Trim());
             Assert.Equal(0, exitCode);
             Assert.Equal(string.Format(@"
